@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Troubleshooting Komputer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F5F9;--surface:#FFFFFF;--ink:#14213D;--muted:#4A5873;--line:#C9D3E3;
+  --signal:#2350E0;--signal-ink:#FFFFFF;--ok:#1B7F55;--warn-bg:#FFF3D1;--warn-ink:#6B4A00;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){color-scheme:dark;--paper:#0E1424;--surface:#161E34;--ink:#E8EEFB;--muted:#9DAAC6;--line:#2B3757;--signal:#7C9BFF;--signal-ink:#0E1424;--ok:#4FD39A;--warn-bg:#3A2E0E;--warn-ink:#FFD98A}
+}
+:root[data-theme="dark"]{color-scheme:dark;--paper:#0E1424;--surface:#161E34;--ink:#E8EEFB;--muted:#9DAAC6;--line:#2B3757;--signal:#7C9BFF;--signal-ink:#0E1424;--ok:#4FD39A;--warn-bg:#3A2E0E;--warn-ink:#FFD98A}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.6 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
+h1,h2,.row-title{font-family:"Bricolage Grotesque","Arial Narrow",system-ui,sans-serif}
+h1{font-weight:800;font-size:clamp(2.2rem,8vw,3.6rem);line-height:1.02;letter-spacing:-.02em;margin:0 0 1rem;max-width:14ch}
+.lead{color:var(--muted);max-width:52ch;margin:0 0 2rem}
+h2{font-weight:600;font-size:1.35rem;margin:3rem 0 .75rem}
+.list{border-top:2px solid var(--ink)}
+.item{border-bottom:1px solid var(--line)}
+.row{all:unset;box-sizing:border-box;display:flex;align-items:center;gap:1rem;width:100%;padding:1rem .25rem;cursor:pointer}
+.row:focus-visible,.step input:focus-visible,.theme:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+.row-text{flex:1;min-width:0}
+.row-title{display:block;font-weight:600;font-size:1.25rem;line-height:1.2}
+.row-sub{display:block;color:var(--muted);font-size:.95rem;margin-top:.15rem}
+.count{font-variant-numeric:tabular-nums;font-size:.9rem;color:var(--muted);white-space:nowrap}
+.count.done{color:var(--ok);font-weight:500}
+.chev{width:.7rem;height:.7rem;border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(45deg);transition:transform .2s;flex:none;margin:0 .25rem}
+.row[aria-expanded="true"] .chev{transform:rotate(-135deg)}
+.panel{display:none;padding:0 .25rem 1.5rem}
+.panel.open{display:block}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:0 0 1rem}
+.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .25s}
+ol{list-style:none;margin:0;padding:0;counter-reset:s}
+.step{counter-increment:s;display:flex;gap:.9rem;align-items:flex-start;padding:.6rem 0}
+.step::before{content:counter(s);flex:none;width:1.8rem;height:1.8rem;border-radius:50%;border:2px solid var(--signal);color:var(--signal);display:grid;place-items:center;font:600 .9rem "IBM Plex Sans",sans-serif}
+.step label{display:flex;gap:.7rem;align-items:flex-start;cursor:pointer;flex:1}
+.step input{flex:none;width:1.3rem;height:1.3rem;margin:.2rem 0 0;accent-color:var(--ok)}
+.step input:checked+span{color:var(--muted);text-decoration:line-through}
+.step code{font:500 .92em ui-monospace,Consolas,monospace;background:var(--line);padding:.05em .35em;border-radius:3px}
+.warn{background:var(--warn-bg);color:var(--warn-ink);padding:.8rem 1rem;border-left:4px solid var(--warn-ink);margin-top:1rem;font-size:.97rem}
+.rules{margin:0;padding-left:1.2rem;max-width:56ch}
+.rules li{margin:.4rem 0}
+footer{margin-top:3rem;color:var(--muted);font-size:.9rem}
+.theme{all:unset;cursor:pointer;float:right;padding:.3rem .7rem;border:1px solid var(--line);border-radius:999px;font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <button class="theme" id="theme" type="button">Ganti tema</button>
+  <h1>Komputer bermasalah? Mulai dari gejalanya.</h1>
+  <p class="lead">Pilih apa yang terjadi pada komputermu. Ikuti langkahnya dari yang termudah, dan centang yang sudah kamu coba.</p>
+
+  <div class="list" id="list"></div>
+
+  <h2>Aturan dasar sebelum memperbaiki</h2>
+  <ul class="rules">
+    <li>Cadangkan data penting lebih dulu, terutama jika ada suara aneh dari harddisk atau error disk.</li>
+    <li>Ubah satu hal dalam satu waktu, lalu uji. Dengan begitu kamu tahu apa yang berhasil.</li>
+    <li>Catat pesan error atau kodenya persis seperti tampil di layar. Kode itu mempermudah pencarian solusi.</li>
+    <li>Matikan komputer dan cabut kabel daya sebelum membuka casing atau menyentuh komponen.</li>
+  </ul>
+  <footer>Panduan umum untuk Windows dan komputer desktop atau laptop. Menu bisa sedikit berbeda di tiap versi.</footer>
+</main>
+
+<script>
+var D=[
+{t:"Komputer tidak mau menyala",s:"Tidak ada lampu, kipas, atau suara",
+ l:["Pastikan kabel daya terpasang kencang di komputer dan stopkontak. Coba stopkontak atau kabel lain.","Cek saklar di power supply (PSU) di belakang casing. Pastikan berada di posisi <code>I</code>.","Lepas semua perangkat USB, flashdisk, dan kabel tambahan, lalu coba nyalakan lagi.","Tahan tombol power 15 detik untuk membuang sisa listrik. Pada laptop, lepas charger dan baterai jika bisa.","Matikan dan cabut daya, buka casing, lalu lepas dan pasang ulang RAM serta kabel power ke motherboard."],
+ w:"Jika setelah semua langkah tetap tidak ada tanda kehidupan sama sekali, power supply atau motherboard kemungkinan rusak. Bawa ke teknisi."},
+{t:"Layar hitam atau tidak ada tampilan",s:"Komputer menyala tetapi monitor kosong",
+ l:["Pastikan monitor menyala dan sumber inputnya sesuai (HDMI, DisplayPort, atau VGA).","Kencangkan kabel video. Coba kabel atau port lain di monitor.","Jika punya kartu grafis terpisah, pastikan kabel monitor tertancap di kartu grafis, bukan di motherboard.","Sambungkan ke monitor atau TV lain untuk memastikan monitor yang bermasalah.","Matikan komputer, lepas RAM, lalu pasang kembali dengan menekan sampai klik."],
+ w:"Bunyi beep berulang saat menyala adalah kode error dari motherboard. Catat jumlah dan polanya, lalu cocokkan dengan buku manual motherboard atau beri tahu teknisi."},
+{t:"Komputer lambat atau sering lag",s:"Program lama terbuka, kursor tersendat",
+ l:["Restart komputer. Banyak masalah ringan hilang setelah itu.","Tekan <code>Ctrl + Shift + Esc</code> untuk membuka Task Manager. Lihat proses yang memakai CPU, memori, atau disk tinggi, lalu tutup yang tidak perlu.","Di tab Startup pada Task Manager, nonaktifkan program yang tidak perlu berjalan saat komputer menyala.","Pastikan drive C masih punya ruang kosong sedikitnya 15%. Hapus file sementara lewat Disk Cleanup.","Pindai dengan Windows Security untuk memastikan tidak ada virus atau malware.","Jalankan Windows Update dan perbarui driver."],
+ w:"Jika komputer masih memakai harddisk (HDD), mengganti ke SSD dan menambah RAM biasanya memberi peningkatan terbesar."},
+{t:"Tidak bisa terhubung ke internet",s:"Wi-Fi terhubung tapi tidak ada akses, atau tidak terdeteksi",
+ l:["Cek apakah perangkat lain bisa online. Jika semuanya gagal, restart modem dan router: cabut daya 30 detik, lalu colok lagi.","Matikan dan nyalakan Wi-Fi, atau coba mode pesawat nyala-mati. Bisa juga pakai kabel LAN.","Buka Settings, Network &amp; internet, lalu jalankan Network troubleshooter.","Buka Command Prompt sebagai Administrator, lalu jalankan <code>ipconfig /release</code>, <code>ipconfig /renew</code>, dan <code>ipconfig /flushdns</code>.","Perbarui atau pasang ulang driver adapter jaringan lewat Device Manager."],
+ w:"Jika semua perangkat di rumah tidak bisa online setelah modem di-restart, hubungi penyedia layanan internet."},
+{t:"Restart sendiri atau layar biru (BSOD)",s:"Komputer mati mendadak atau muncul pesan error biru",
+ l:["Catat kode di layar biru, misalnya yang tertulis setelah “Stop code”.","Cabut perangkat eksternal yang baru dipasang.","Perbarui atau kembalikan (rollback) driver yang terakhir diubah, terutama driver grafis.","Pastikan komputer tidak terlalu panas dan kipas bersih (lihat gejala panas di bawah).","Buka Command Prompt sebagai Administrator, jalankan <code>sfc /scannow</code>, lalu <code>Windows Memory Diagnostic</code> dari menu Start.","Jika masih terjadi, nyalakan dalam Safe Mode untuk menguji apakah masalahnya dari driver atau program."],
+ w:"Error berulang yang menyebut memori atau disk bisa berarti RAM atau drive mulai rusak. Cadangkan data segera dan bawa ke teknisi."},
+{t:"Suara tidak keluar",s:"Speaker atau headphone senyap",
+ l:["Cek volume dan pastikan tidak dalam kondisi mute, baik di komputer maupun speaker.","Klik ikon speaker di taskbar dan pilih perangkat output yang benar.","Cabut dan colok ulang kabel audio. Coba jack atau port USB lain.","Klik kanan ikon speaker, pilih Troubleshoot sound problems.","Perbarui atau pasang ulang driver audio lewat Device Manager."],
+ w:"Jika speaker atau headphone juga senyap di perangkat lain, masalahnya ada di speaker atau headphone itu sendiri."},
+{t:"USB atau printer tidak terdeteksi",s:"Flashdisk, mouse, atau printer tidak muncul",
+ l:["Coba port USB lain dan sambungkan langsung ke komputer, bukan lewat hub.","Coba perangkat yang sama di komputer lain.","Buka Device Manager dan cari tanda seru kuning. Klik kanan, lalu perbarui atau pasang ulang driver.","Untuk printer: pastikan statusnya online, hapus antrean cetak yang macet, lalu restart layanan <code>Print Spooler</code>.","Unduh dan pasang driver resmi dari situs produsen perangkat."],
+ w:"Jika perangkat tidak terdeteksi di komputer lain juga, kemungkinan perangkat atau kabelnya rusak."},
+{t:"Komputer terlalu panas atau kipas berisik",s:"Badan laptop panas, kipas berputar kencang terus",
+ l:["Pastikan kipas berputar dan lubang ventilasi tidak tertutup kain, kasur, atau dinding.","Matikan komputer, cabut daya, lalu bersihkan debu dari kipas dan ventilasi dengan kuas lembut dan blower.","Letakkan di permukaan keras dan rata. Untuk laptop, pakai cooling pad.","Pantau suhu dengan aplikasi seperti HWMonitor. Suhu di atas sekitar 90 °C secara terus-menerus perlu ditangani.","Tutup program berat yang tidak dipakai dan atur Power mode ke Balanced.","Jika komputer sudah bertahun-tahun belum dibersihkan, thermal paste di prosesor mungkin sudah kering dan perlu diganti."],
+ w:"Mengganti thermal paste dan membongkar laptop butuh ketelitian. Jika belum pernah, serahkan ke teknisi."}
+];
+var list=document.getElementById("list");
+D.forEach(function(d,i){
+  var item=document.createElement("div");item.className="item";
+  var steps=d.l.map(function(x,j){return '<li class="step"><label><input type="checkbox" data-i="'+i+'"><span>'+x+'</span></label></li>'}).join("");
+  item.innerHTML='<button class="row" type="button" aria-expanded="false" aria-controls="p'+i+'"><span class="row-text"><span class="row-title">'+d.t+'</span><span class="row-sub">'+d.s+'</span></span><span class="count" id="c'+i+'">0/'+d.l.length+'</span><span class="chev" aria-hidden="true"></span></button>'+
+  '<div class="panel" id="p'+i+'"><div class="bar"><i id="b'+i+'"></i></div><ol>'+steps+'</ol><div class="warn"><strong>Kapan ke teknisi.</strong> '+d.w+'</div></div>';
+  list.appendChild(item);
+});
+list.addEventListener("click",function(e){
+  var r=e.target.closest(".row");if(!r)return;
+  var open=r.getAttribute("aria-expanded")==="true";
+  list.querySelectorAll(".row").forEach(function(x){x.setAttribute("aria-expanded","false");x.nextElementSibling.classList.remove("open")});
+  if(!open){r.setAttribute("aria-expanded","true");r.nextElementSibling.classList.add("open");r.scrollIntoView({block:"start",behavior:"smooth"})}
+});
+list.addEventListener("change",function(e){
+  var i=e.target.dataset.i;if(i===undefined)return;
+  var boxes=document.querySelectorAll('#p'+i+' input'),n=0;
+  boxes.forEach(function(b){if(b.checked)n++});
+  var c=document.getElementById("c"+i);
+  c.textContent=n===boxes.length?"Selesai":n+"/"+boxes.length;
+  c.className="count"+(n===boxes.length?" done":"");
+  document.getElementById("b"+i).style.width=(n/boxes.length*100)+"%";
+});
+document.getElementById("theme").addEventListener("click",function(){
+  var r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme=dark?"light":"dark";
+});
+</script>
+</body>
+</html>
